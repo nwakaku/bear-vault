@@ -52,7 +52,7 @@ interact.showTime = (t) => {
   process.exit(1);
 };
 
-const choiceArray = ["I'm not here", "I'm still here"];
+const choiceArray = ["I'm still here", "I'm not here" ];
 
 
 if (isAlice) {
@@ -61,15 +61,15 @@ if (isAlice) {
     stdlib.parseCurrency
   );
   interact.inherit = amt;
-  interact.deadline = { ETH: 100, ALGO: 100, CFX: 1000 }[stdlib.connector];
+  interact.deadline = { ETH: 10, ALGO: 10, CFX: 100 }[stdlib.connector];
   interact.getChoice = async () => {
       const choice = await ask.ask(
         `Are you still here?`,
         ask.yesno
       );
       // const choice = Math.floor(Math.random() * 2);
-      console.log(`Alice's choice is ${choice ? choiceArray[1] : choice[2]}`);
-      return (choice ? false : true);
+      console.log(`Alice's choice is ${choice ? choiceArray[0] : choiceArray[1]}`);
+      return (choice ? true : false);
     }
 } else {
   interact.acceptTerms = async (num) => {
@@ -77,6 +77,7 @@ if (isAlice) {
       `do you accepts the terms of The Vault for ${stdlib.formatCurrency(num)}?`,
       ask.yesno
     );
+    return (accepted ? true : false);
     if (!accepted) {
       process.exit(0);
     }

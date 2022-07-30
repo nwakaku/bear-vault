@@ -21,8 +21,6 @@ export const main = Reach.App(() => {
     acceptTerms: Fun([UInt], Bool),
   });
   init();
-
-
   // The first one to publish deploys the contract
   A.only(() => {
     const value = declassify(interact.inherit);
@@ -44,51 +42,36 @@ export const main = Reach.App(() => {
 
   A.publish();
 
-  var [COUNTDOWN, CHOICE ]   = [20 + lastConsensusTime(), true] ;
-//   { const end = lastConsensusTime() + COUNTDOWN; }
-  invariant(balance() == value);
-  while ( CHOICE ){
+  var COUNTDOWN   = 20 ;
+  { const end = lastConsensusTime() + COUNTDOWN; }
+  invariant(balance() >= value);
+  while ( lastConsensusTime() <= end ){
     // assert(end >= 1 );
+    commit();
 
-    const showTime =  () => {
-    each([A, B], () => {
+  const showTime = () => {
+  each([A, B], () => {
     interact.showTime(COUNTDOWN)
   });
   }
-
-    if (COUNTDOWN == lastConsensusTime() ) {
-        transfer(value).to(A)
-        // each([A, B], () => {
-        //     interact.showTime(COUNTDOWN)
-        // })
-        commit()
-        exit()
-    }else{
-    commit();
 
   A.only(() => {
     const stillHere = declassify(interact.getChoice());
   })
   A.publish(stillHere)
     .timeout(relativeTime(deadline), () => closeTo(B, showTime));
-    [COUNTDOWN, CHOICE] = [COUNTDOWN - 1, stillHere];
-    //   showTime();
-
-    continue;
-    }
 
 
   // assert( value > 1);
-//   if(stillHere){
-//     transfer(value).to(A);
-//   } else {
-//     transfer(value).to(B);
-//   }
-
-
+  if(stillHere){
+    transfer(value).to(A);
+  } else {
+    transfer(value).to(B);
   }
-    transfer(value).to(B)
 
+  COUNTDOWN = COUNTDOWN - 1;
+  continue;
+  }
   
   // The second one to publish always attaches
   // write your program here
