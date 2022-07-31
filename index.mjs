@@ -11,12 +11,14 @@ const who = isAlice ? 'Alice' : 'Bob';
 console.log(`Hello, Alice and Bob! starting vault as ${who}`);
 
 let acc = null;
+let accBob = null;
 const createAcc = await ask.ask(
   `Would you like to create an account? (only possible on devnet)`,
   ask.yesno
 );
 if (createAcc) {
-  acc = await stdlib.newTestAccount(stdlib.parseCurrency(1000));
+  acc = await stdlib.newTestAccount(stdlib.parseCurrency(5000));
+  accBob = await stdlib.newTestAccount(stdlib.parseCurrency(100));
 } else {
   const secret = await ask.ask(
     `What is your account secret?`,
@@ -36,14 +38,21 @@ if (isAlice) {
     `Please paste the contract information:`,
     JSON.parse
   );
-  ctc = acc.contract(backend, info);
+  ctc = accBob.contract(backend, info);
 }
 
 const fmt = (x) => stdlib.formatCurrency(x, 4);
 const getBalance = async () => fmt(await stdlib.balanceOf(acc));
+const getBalanceBob = async () => fmt(await stdlib.balanceOf(accBob));
 
-const before = await getBalance();
+if(isAlice){
+  const before = await getBalance();
 console.log(`Your balance is ${before}`);
+}else{
+  const before = await getBalanceBob();
+console.log(`Your balance is ${before}`);
+}
+
 
 const interact = { ...stdlib.hasRandom };
 
@@ -57,7 +66,7 @@ const choiceArray = ["I'm still here", "I'm not here" ];
 
 if (isAlice) {
   const amt = await ask.ask(
-    `How much do you want to put into the smart contract?`,
+    `How much do you want to put into the vault contract?`,
     stdlib.parseCurrency
   );
   interact.inherit = amt;
@@ -87,8 +96,16 @@ if (isAlice) {
 const part = isAlice ? ctc.p.Alice : ctc.p.Bob;
 await part(interact);
 
-const after = await getBalance();
-console.log(`Your balance is now ${after}`)
+if(isAlice){
+  const after = await getBalance();
+console.log(`Your balance is ${after}`);
+}else{
+  const after = await getBalanceBob();
+console.log(`Your balance is ${after}`);
+}
+
+// const after = await getBalance();
+// console.log(`Your balance is now ${after}`)
 
 ask.done();
 
